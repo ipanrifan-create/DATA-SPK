@@ -25,15 +25,23 @@ jobs:
         with:
           install-chromedriver: true
 
-      - name: Install Dependencies
+  - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # Menambahkan webdriver-manager untuk membantu sinkronisasi versi
-          pip install requests selenium undetected-chromedriver openpyxl PyGithub webdriver-manager
-
-      - name: Jalankan Script Bot
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EMAIL_SCM: ${{ secrets.EMAIL_SCM }}
-          PASS_SCM: ${{ secrets.PASS_SCM }}
-        run: python bot_scm.py
+          pip install requests selenium undetected-chromedriver openpyxl PyGithub
+          
+          # Hapus driver yang salah
+          sudo apt-get remove -y google-chrome-stable
+          
+          # Instal Chrome dan Driver yang sinkron secara manual
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          
+          # Dapatkan versi Chrome saat ini
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          DRIVER_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
+          
+          # Instal ChromeDriver yang cocok
+          sudo apt-get install -y chromium-chromedriver
+          # Simbolik link agar terdeteksi oleh script
+          sudo ln -sf /usr/bin/chromedriver /usr/bin/chromedriver
