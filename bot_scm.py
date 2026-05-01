@@ -5,8 +5,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from openpyxl import load_workbook
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service
 
 def upload_to_github(data, filename="data_scm.json"):
     g = Github(os.environ.get('GITHUB_TOKEN'))
@@ -27,24 +25,24 @@ def jalankan_bot():
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
     
-    # MENGGUNAKAN SERVICE DARI WEBDRIVER-MANAGER
-    # Ini akan mendeteksi versi Chrome yang terpasang dan memakai driver yang cocok
-    driver = uc.Chrome(
-        options=options,
-        service=Service(ChromeDriverManager().install())
-    )
+    # Inisialisasi tanpa webdriver-manager untuk menghindari bentrok versi
+    # Kita biarkan undetected-chromedriver yang mencari driver di sistem
+    driver = uc.Chrome(options=options)
     
     try:
         driver.get("https://scm.nusadaya.net/login")
-        wait = WebDriverWait(driver, 20)
+        wait = WebDriverWait(driver, 25)
         
+        # Login
         email_input = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='text' or @placeholder='Email atau NIP']")))
         email_input.send_keys(os.environ.get('EMAIL_SCM'))
         driver.find_element(By.XPATH, "//input[@type='password']").send_keys(os.environ.get('PASS_SCM'))
         driver.find_element(By.XPATH, "//button[contains(text(), 'Log in')]").click()
         time.sleep(15)
         
+        # Download
         session_cookies = {c['name']: c['value'] for c in driver.get_cookies()}
         response_dl = requests.get("https://scm.nusadaya.net/izin-prinsip/export", cookies=session_cookies)
         
@@ -55,11 +53,11 @@ def jalankan_bot():
         else:
             print(f"Gagal download, status code: {response_dl.status_code}")
         
+    except Exception as e:
+        print(f"Terjadi error: {e}")
     finally:
         driver.quit()
         print("=== [FINISH] Operasi Selesai ===")
 
-if __name__ == "__main__":
-    jalankan_bot()
 if __name__ == "__main__":
     jalankan_bot()
