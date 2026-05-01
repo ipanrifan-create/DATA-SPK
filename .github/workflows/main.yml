@@ -1,0 +1,22 @@
+name: Bot_SCM_Otomatis_Update
+on:
+  schedule:
+    - cron: '23 */4 * * *' # Berjalan otomatis setiap 4 jam
+  workflow_dispatch: # Memungkinkan Anda menjalankan manual lewat tab Actions
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Dependencies
+        run: pip install requests selenium undetected-chromedriver openpyxl
+      - name: Jalankan Script Bot
+        env:
+          EMAIL_SCM: ${{ secrets.EMAIL_SCM }}
+          PASS_SCM: ${{ secrets.PASS_SCM }}
+        run: python bot_scm.py
