@@ -1,22 +1,32 @@
 name: Bot_SCM_Otomatis_Update
+
 on:
   schedule:
-    - cron: '23 */4 * * *' # Berjalan otomatis setiap 4 jam
-  workflow_dispatch: # Memungkinkan Anda menjalankan manual lewat tab Actions
+    - cron: '0 * * * *' # Berjalan setiap 1 jam tepat
+  workflow_dispatch:
+
+permissions:
+  contents: write # WAJIB: Memberi izin bot untuk membuat/update file JSON
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+          
       - name: Install Dependencies
-        run: pip install requests selenium undetected-chromedriver openpyxl
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests selenium undetected-chromedriver openpyxl PyGithub
+          
       - name: Jalankan Script Bot
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Disediakan otomatis oleh GitHub
           EMAIL_SCM: ${{ secrets.EMAIL_SCM }}
           PASS_SCM: ${{ secrets.PASS_SCM }}
         run: python bot_scm.py
