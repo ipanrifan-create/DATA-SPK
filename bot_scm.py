@@ -5,6 +5,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from openpyxl import load_workbook
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 def upload_to_github(data, filename="data_scm.json"):
     g = Github(os.environ.get('GITHUB_TOKEN'))
@@ -26,8 +28,12 @@ def jalankan_bot():
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     
-    # Inisialisasi yang lebih stabil untuk Linux/GitHub Actions
-    driver = uc.Chrome(options=options, version_main=None) 
+    # MENGGUNAKAN SERVICE DARI WEBDRIVER-MANAGER
+    # Ini akan mendeteksi versi Chrome yang terpasang dan memakai driver yang cocok
+    driver = uc.Chrome(
+        options=options,
+        service=Service(ChromeDriverManager().install())
+    )
     
     try:
         driver.get("https://scm.nusadaya.net/login")
@@ -53,5 +59,7 @@ def jalankan_bot():
         driver.quit()
         print("=== [FINISH] Operasi Selesai ===")
 
+if __name__ == "__main__":
+    jalankan_bot()
 if __name__ == "__main__":
     jalankan_bot()
