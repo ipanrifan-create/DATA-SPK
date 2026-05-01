@@ -11,37 +11,38 @@ permissions:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
 
-      # Menginstal Chrome versi terbaru dan memastikan driver selaras
-      - name: Setup Chrome
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Chrome & ChromeDriver
         uses: browser-actions/setup-chrome@latest
         with:
           install-chromedriver: true
 
-  - name: Install Dependencies
+      - name: Verify Chrome Installation
+        run: |
+          echo "--- Chrome Version ---"
+          google-chrome --version || chrome --version
+          echo "--- ChromeDriver Version ---"
+          chromedriver --version || echo "ChromeDriver not found in PATH"
+          echo "--- ChromeDriver Location ---"
+          which chromedriver || echo "chromedriver not in PATH"
+
+      - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests selenium undetected-chromedriver openpyxl PyGithub
-          
-          # Hapus driver yang salah
-          sudo apt-get remove -y google-chrome-stable
-          
-          # Instal Chrome dan Driver yang sinkron secara manual
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          
-          # Dapatkan versi Chrome saat ini
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          DRIVER_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
-          
-          # Instal ChromeDriver yang cocok
-          sudo apt-get install -y chromium-chromedriver
-          # Simbolik link agar terdeteksi oleh script
-          sudo ln -sf /usr/bin/chromedriver /usr/bin/chromedriver
+
+      - name: Run Bot SCM
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EMAIL_SCM: ${{ secrets.EMAIL_SCM }}
+          PASS_SCM: ${{ secrets.PASS_SCM }}
+        run: python bot_scm.py
