@@ -2,11 +2,11 @@ name: Bot_SCM_Otomatis_Update
 
 on:
   schedule:
-    - cron: '0 * * * *' # Berjalan setiap 1 jam tepat
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write # WAJIB: Memberi izin bot untuk membuat/update file JSON
+  contents: write
 
 jobs:
   run-bot:
@@ -18,15 +18,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          
+
+      # Langkah krusial: Memastikan Chrome terinstal dengan benar
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
+        
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests selenium undetected-chromedriver openpyxl PyGithub
-          
+
       - name: Jalankan Script Bot
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Disediakan otomatis oleh GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EMAIL_SCM: ${{ secrets.EMAIL_SCM }}
           PASS_SCM: ${{ secrets.PASS_SCM }}
         run: python bot_scm.py
