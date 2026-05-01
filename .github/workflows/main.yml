@@ -21,24 +21,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Chrome & ChromeDriver
+      - name: Install Chrome (tanpa ChromeDriver)
         uses: browser-actions/setup-chrome@latest
         with:
-          install-chromedriver: true
+          install-chromedriver: false
+      # ChromeDriver akan otomatis di-download oleh Selenium Manager
+      # yang sudah built-in di Selenium 4.6+, sehingga versi selalu sinkron
 
-      - name: Verify Chrome Installation
+      - name: Verify Chrome
         run: |
           echo "--- Chrome Version ---"
           google-chrome --version || chrome --version
-          echo "--- ChromeDriver Version ---"
-          chromedriver --version || echo "ChromeDriver not found in PATH"
-          echo "--- ChromeDriver Location ---"
-          which chromedriver || echo "chromedriver not in PATH"
 
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests selenium undetected-chromedriver openpyxl PyGithub
+          pip install requests selenium openpyxl PyGithub
 
       - name: Run Bot SCM
         env:
